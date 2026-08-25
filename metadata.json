@@ -1,0 +1,10 @@
+{
+  "name": "Mi Bodeguita",
+  "description": "App web móvil para gestionar inventario, ventas y punto de venta con escáner de código de barras.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
