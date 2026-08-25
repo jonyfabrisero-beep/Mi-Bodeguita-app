@@ -6,7 +6,11 @@ import { es } from 'date-fns/locale';
 import { AlertTriangle, TrendingUp, Package, Settings as SettingsIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-export default function Dashboard() {
+interface DashboardProps {
+  onNavigate?: (tab: string) => void;
+}
+
+export default function Dashboard({ onNavigate }: DashboardProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [tempCategories, setTempCategories] = useState<string[]>([]);
   const [newCat, setNewCat] = useState('');
@@ -195,7 +199,19 @@ export default function Dashboard() {
                   <h3 className="font-bold text-sm">{p.name}</h3>
                   <p className="text-[10px] uppercase font-black text-orange-600">Quedan: {p.stock} (Mín: {p.minStock})</p>
                 </div>
-                <button className="text-[10px] font-black underline">REVISAR</button>
+                <button 
+                  onClick={() => {
+                    if (onNavigate) {
+                      onNavigate('inventory');
+                      setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('editProduct', { detail: p }));
+                      }, 100);
+                    }
+                  }}
+                  className="text-[10px] font-black underline uppercase active:scale-95 transition-all"
+                >
+                  Revisar
+                </button>
               </div>
             ))}
           </div>

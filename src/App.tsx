@@ -31,7 +31,7 @@ export default function App() {
           transition={{ duration: 0.2 }}
           className="h-full w-full absolute inset-0"
         >
-          {activeTab === 'dashboard' && <Dashboard />}
+          {activeTab === 'dashboard' && <Dashboard onNavigate={setActiveTab} />}
           {activeTab === 'inventory' && <Inventory />}
           {activeTab === 'pos' && <POS />}
           {activeTab === 'history' && <History />}

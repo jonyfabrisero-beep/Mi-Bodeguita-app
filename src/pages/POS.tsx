@@ -112,13 +112,12 @@ export default function POS() {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return alert('El carrito está vacío');
-    if (!clientName.trim()) return alert('Ingrese el nombre del cliente');
 
     try {
       // Registrar Venta
       await db.sales.add({
         date: Date.now(),
-        clientName: clientName.trim(),
+        clientName: clientName.trim() || 'Cliente Sin Nombre',
         items: cart,
         totalUSD,
         totalVES,

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Product } from '../db/db';
-import { Search, Plus, Edit2, Trash2, Maximize } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Maximize, ScanBarcode } from 'lucide-react';
 import Scanner from '../components/Scanner';
 
 export default function Inventory() {
@@ -9,6 +9,7 @@ export default function Inventory() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showScanner, setShowScanner] = useState(false);
+  const [showSearchScanner, setShowSearchScanner] = useState(false);
   
   // Form State
   const [barcode, setBarcode] = useState('');
@@ -24,6 +25,23 @@ export default function Inventory() {
   const settings = useLiveQuery(() => db.settings.get(1));
   const [addStockPrompt, setAddStockPrompt] = useState<Product | null>(null);
   const [addStockAmount, setAddStockAmount] = useState('');
+
+  useEffect(() => {
+    const handleEditProduct = (e: CustomEvent<Product>) => {
+      const p = e.detail;
+      setEditingProduct(p);
+      setBarcode(p.barcode);
+      setName(p.name);
+      setPriceUSD(p.priceUSD.toString());
+      setStock(p.stock.toString());
+      setMinStock(p.minStock.toString());
+      setIsWeighed(p.isWeighed || false);
+      setCategory(p.category || '');
+      setIsAdding(true);
+    };
+    window.addEventListener('editProduct' as any, handleEditProduct);
+    return () => window.removeEventListener('editProduct' as any, handleEditProduct);
+  }, []);
 
   const products = useLiveQuery(
     () => db.products
@@ -116,6 +134,11 @@ export default function Inventory() {
     setIsAdding(false);
   };
 
+  const handleSearchScan = (decodedText: string) => {
+    setSearchTerm(decodedText);
+    setShowSearchScanner(false);
+  };
+
   if (isAdding) {
     return (
       <div className="p-4 pb-24 max-w-md mx-auto h-full overflow-y-auto">
@@ -188,9 +211,10 @@ export default function Inventory() {
               />
             </div>
             <div>
-              <label className="block text-sm font-black uppercase tracking-widest text-[#2D3047] mb-1">Stock</label>
+              <label className="block text-sm font-black uppercase tracking-widest text-[#2D3047] mb-1">Stock {isWeighed ? '(Kg)' : '(Unid)'}</label>
               <input 
                 type="number" 
+                step={isWeighed ? "0.001" : "1"}
                 min="0"
                 value={stock}
                 onChange={e => setStock(e.target.value)}
@@ -201,9 +225,10 @@ export default function Inventory() {
           </div>
 
           <div>
-            <label className="block text-sm font-black uppercase tracking-widest text-[#2D3047] mb-1">Stock Mínimo</label>
+            <label className="block text-sm font-black uppercase tracking-widest text-[#2D3047] mb-1">Stock Mínimo {isWeighed ? '(Kg)' : '(Unid)'}</label>
             <input 
               type="number" 
+              step={isWeighed ? "0.001" : "1"}
               min="0"
               value={minStock}
               onChange={e => setMinStock(e.target.value)}
@@ -302,18 +327,28 @@ export default function Inventory() {
         </button>
       </div>
 
-      <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-[#2D3047]" />
+      <div className="flex gap-2 mb-6">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-[#2D3047]" />
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-3 border-2 border-[#2D3047] rounded-xl bg-white font-bold focus:outline-none focus:border-[#FF6B35]"
+            placeholder="BUSCAR PRODUCTO..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <input
-          type="text"
-          className="block w-full pl-10 pr-3 py-3 border-2 border-[#2D3047] rounded-xl bg-white font-bold focus:outline-none focus:border-[#FF6B35]"
-          placeholder="BUSCAR PRODUCTO..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <button
+          onClick={() => setShowSearchScanner(true)}
+          className="bg-[#2D3047] text-white p-3 rounded-xl border-2 border-[#2D3047] shadow-[2px_2px_0px_0px_#FF6B35] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none flex items-center justify-center transition-all"
+        >
+          <ScanBarcode className="w-5 h-5" />
+        </button>
       </div>
+
+      {showSearchScanner && <Scanner onScan={handleSearchScan} onClose={() => setShowSearchScanner(false)} />}
 
       <div className="flex-1 overflow-y-auto space-y-3">
         {products?.map(p => (
