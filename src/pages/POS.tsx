@@ -1,17 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Product, SaleItem } from '../db/db';
 import { Search, Plus, Minus, Trash2, Maximize, ShoppingCart } from 'lucide-react';
 import Scanner from '../components/Scanner';
 
 export default function POS() {
-  const [cart, setCart] = useState<SaleItem[]>([]);
-  const [clientName, setClientName] = useState('');
+  const [cart, setCart] = useState<SaleItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('pos_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
+  const [clientName, setClientName] = useState(() => {
+    return localStorage.getItem('pos_client') || '';
+  });
   const [showScanner, setShowScanner] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [weightPrompt, setWeightPrompt] = useState<Product | null>(null);
   const [weightAmount, setWeightAmount] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem('pos_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('pos_client', clientName);
+  }, [clientName]);
 
   const settings = useLiveQuery(() => db.settings.get(1));
   const rate = settings?.exchangeRateVES || 1;
@@ -144,7 +159,7 @@ export default function POS() {
   };
 
   return (
-    <div className="p-4 pb-24 max-w-md mx-auto h-full flex flex-col relative">
+    <div className="p-4 pb-32 max-w-md mx-auto h-full overflow-y-auto flex flex-col relative">
 
       {toastMessage && (
         <div className="absolute top-4 left-4 right-4 z-50 bg-[#2D3047] text-white p-4 rounded-xl border-4 border-[#FF6B35] shadow-[4px_4px_0px_0px_#FF6B35] font-black uppercase text-center animate-bounce">
@@ -227,7 +242,7 @@ export default function POS() {
       </div>
 
       {/* Carrito */}
-      <div className="flex-1 overflow-y-auto mb-4 bg-white rounded-[1.5rem] p-4 border-4 border-[#2D3047] shadow-[4px_4px_0px_0px_#2D3047]">
+      <div className="mb-4 bg-white rounded-[1.5rem] p-4 border-4 border-[#2D3047] shadow-[4px_4px_0px_0px_#2D3047]">
         {cart.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-[#2D3047]/40">
             <ShoppingCart className="w-12 h-12 mb-2" />
@@ -262,7 +277,7 @@ export default function POS() {
       </div>
 
       {/* Totales y Checkout */}
-      <div className="bg-white p-6 rounded-[2rem] border-4 border-[#2D3047] shadow-[8px_8px_0px_0px_#2D3047] mt-auto">
+      <div className="bg-white p-6 rounded-[2rem] border-4 border-[#2D3047] shadow-[8px_8px_0px_0px_#2D3047] mt-auto flex-shrink-0">
         <div className="flex justify-between items-end mb-4">
           <span className="text-sm font-black uppercase tracking-tight text-[#2D3047]">Total a Cobrar</span>
           <div className="text-right">
@@ -277,6 +292,19 @@ export default function POS() {
         >
           Procesar Venta
         </button>
+        {cart.length > 0 && (
+          <button 
+            onClick={() => {
+              if(window.confirm('¿Deseas cancelar la venta y vaciar el carrito?')) {
+                setCart([]);
+                setClientName('');
+              }
+            }}
+            className="w-full mt-4 bg-white text-red-500 font-black text-sm py-3 rounded-2xl border-4 border-[#2D3047] shadow-[4px_4px_0px_0px_#2D3047] active:translate-y-1 active:translate-x-1 active:shadow-none uppercase tracking-wide transition-all"
+          >
+            Cancelar Compra
+          </button>
+        )}
       </div>
 
       {showScanner && <Scanner onScan={handleScan} onClose={() => setShowScanner(false)} />}
