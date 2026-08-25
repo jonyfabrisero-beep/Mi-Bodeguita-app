@@ -17,7 +17,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
   ];
 
   return (
-    <div className="h-screen w-full flex flex-col font-sans overflow-hidden bg-[#FFF9F0] text-[#2D3047]">
+    <div className="h-[100dvh] w-full flex flex-col font-sans overflow-hidden bg-[#FFF9F0] text-[#2D3047]">
       <main className="flex-1 overflow-hidden relative">
         {children}
       </main>

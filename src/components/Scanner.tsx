@@ -46,6 +46,26 @@ export default function Scanner({ onScan, onClose }: ScannerProps) {
 
   return (
     <div className="fixed inset-0 z-[70] bg-[#FFF9F0] flex flex-col">
+      <style>{`
+        #qr-reader { border: none !important; }
+        #qr-reader * { font-family: sans-serif; }
+        /* Hide html5-qrcode's injected UI (select, buttons, spans, links) */
+        #qr-reader select,
+        #qr-reader button,
+        #qr-reader a,
+        #qr-reader span,
+        #qr-reader select + br,
+        #qr-reader div:has(select),
+        #qr-reader div:has(button) {
+          display: none !important;
+        }
+        /* Ensure the video feed shows correctly */
+        #qr-reader video {
+          object-fit: cover !important;
+          width: 100% !important;
+          border-radius: 2rem !important;
+        }
+      `}</style>
       <div className="flex justify-between items-center p-4 bg-[#2D3047] text-white">
         <h2 className="text-2xl font-black uppercase tracking-tighter text-[#FF6B35]">Escanear</h2>
         <button 
