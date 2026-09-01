@@ -65,3 +65,18 @@ db.on('populate', () => {
     categories: ['Víveres', 'Charcutería', 'Carnicería', 'Frutas y Verduras']
   }); // Default rate
 });
+
+db.on('ready', async () => {
+  try {
+    const existing = await db.settings.get(1);
+    if (!existing) {
+      await db.settings.put({
+        id: 1,
+        exchangeRateVES: 36.5,
+        categories: ['Víveres', 'Charcutería', 'Carnicería', 'Frutas y Verduras']
+      });
+    }
+  } catch (e) {
+    console.error('Error verifying settings in IndexedDB:', e);
+  }
+});

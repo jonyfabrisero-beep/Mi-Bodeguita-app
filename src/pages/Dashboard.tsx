@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format, subDays, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AlertTriangle, TrendingUp, Package, Settings as SettingsIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent, type MouseEvent } from 'react';
 
 interface DashboardProps {
   onNavigate?: (tab: string) => void;
@@ -23,7 +23,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     }
   }, [showSettings, settings]);
 
-  const handleAddCategory = (e: React.MouseEvent) => {
+  const handleAddCategory = (e: MouseEvent) => {
     e.preventDefault();
     if (newCat.trim() && !tempCategories.includes(newCat.trim())) {
       setTempCategories([...tempCategories, newCat.trim()]);
@@ -55,7 +55,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
     };
   });
 
-  const handleSaveSettings = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveSettings = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const rate = Number(fd.get('rate'));

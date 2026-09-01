@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, Product } from '../db/db';
 import { Search, Plus, Edit2, Trash2, Maximize, ScanBarcode } from 'lucide-react';
@@ -97,7 +97,7 @@ export default function Inventory() {
     }
   };
 
-  const handleAddStock = async (e: React.FormEvent) => {
+  const handleAddStock = async (e: FormEvent) => {
     e.preventDefault();
     if (addStockPrompt && addStockAmount) {
       const added = Number(addStockAmount);
@@ -109,7 +109,7 @@ export default function Inventory() {
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: FormEvent) => {
     e.preventDefault();
     if (!category) {
       alert('Por favor, selecciona una categoría para el producto.');
