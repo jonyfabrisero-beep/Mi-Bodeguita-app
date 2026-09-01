@@ -82,13 +82,13 @@ export default function POS() {
     setCart(prev => {
       const existing = prev.find(item => item.productId === product.id);
       if (existing) {
-        if (existing.quantity + qty > product.stock) {
+        if (Number(existing.quantity) + Number(qty) > product.stock) {
           showToast(`Solo hay ${product.stock} disponibles en stock.`);
           return prev;
         }
-        return prev.map(item => item.productId === product.id ? { ...item, quantity: item.quantity + qty } : item);
+        return prev.map(item => item.productId === product.id ? { ...item, quantity: Number(item.quantity) + Number(qty) } : item);
       }
-      if (product.stock <= 0 || qty > product.stock) {
+      if (product.stock <= 0 || Number(qty) > product.stock) {
         showToast(`Stock insuficiente. Disponible: ${product.stock}`);
         return prev;
       }
@@ -96,8 +96,8 @@ export default function POS() {
         productId: product.id!,
         barcode: product.barcode,
         name: product.name,
-        priceUSD: product.priceUSD,
-        quantity: qty,
+        priceUSD: Number(product.priceUSD),
+        quantity: Number(qty),
         isWeighed: product.isWeighed
       }];
     });
@@ -109,7 +109,7 @@ export default function POS() {
       return prev.map(item => {
         if (item.productId === productId) {
           const actualDelta = item.isWeighed ? delta * 0.1 : delta;
-          let newQ = item.quantity + actualDelta;
+          let newQ = Number(item.quantity) + actualDelta;
           newQ = Number(newQ.toFixed(3)); // Handle float issues
           return newQ > 0 ? { ...item, quantity: newQ } : item;
         }
@@ -122,8 +122,8 @@ export default function POS() {
     setCart(prev => prev.filter(item => item.productId !== productId));
   };
 
-  const totalUSD = cart.reduce((sum, item) => sum + (item.priceUSD * item.quantity), 0);
-  const totalVES = totalUSD * rate;
+  const totalUSD = cart.reduce((sum, item) => sum + ((Number(item.priceUSD) || 0) * (Number(item.quantity) || 0)), 0);
+  const totalVES = totalUSD * (Number(rate) || 1);
 
   const handleCheckout = async () => {
     if (cart.length === 0) return alert('El carrito está vacío');
@@ -254,7 +254,12 @@ export default function POS() {
               <div key={item.productId} className="bg-[#F7F1E3] p-3 rounded-xl border-2 border-transparent hover:border-[#FF6B35] flex items-center justify-between">
                 <div className="flex-1">
                   <h4 className="font-black text-[#2D3047] text-sm leading-tight uppercase">{item.name}</h4>
-                  <div className="text-[#FF6B35] font-black text-sm mt-1">${item.priceUSD.toFixed(2)}</div>
+                  <div className="text-[#FF6B35] font-black text-sm mt-1">
+                    ${(Number(item.priceUSD) * Number(item.quantity)).toFixed(2)}
+                    <span className="text-[#2D3047]/50 text-xs ml-1 font-bold">
+                      ({item.quantity} x ${Number(item.priceUSD).toFixed(2)})
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center border-2 border-[#2D3047] rounded-lg overflow-hidden bg-white">
